@@ -12,6 +12,7 @@ public class ChessGameController : MonoBehaviour
     [SerializeField] private BoardLayout startingBoardLayout;
     [SerializeField] private Board board;
     [SerializeField] private ChessUIManager uIManager;
+    [SerializeField] private CameraController cameraController;
 
 
     private PieceCreator pieceCreator;
@@ -130,6 +131,7 @@ public class ChessGameController : MonoBehaviour
             ChangeActiveTeam();
             if (CheckIfStalemate())
                 EndGameStalemate();
+            cameraController.MoveCamera();
         }
             
     }
@@ -161,6 +163,20 @@ public class ChessGameController : MonoBehaviour
             {
                 bool canCoverKing = oppositePlayer.CanHidePieceFromAttack<King>(activePlayer);
                 if (!canCoverKing)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public bool CheckPromotion()
+    {
+        foreach (var piece in activePlayer.activePieces)
+        {
+            if (piece.GetType() == typeof (Pawn))
+            {
+                int endOfBoardYCoord = piece.team == TeamColor.White ? Board.BOARD_SIZE - 1 : 0;
+                if (piece.occupiedSquare.y == endOfBoardYCoord)
                     return true;
             }
         }
@@ -209,13 +225,14 @@ public class ChessGameController : MonoBehaviour
             return false;
     }
 
-    public void PauseGame()
+    public void PauseGameForPromotion()
     {
         SetGameState(GameState.Pause);
     }
-    public void Resume()
+    public void ResumeGameFromPromotion()
     {
         SetGameState(GameState.Play);
+        EndTurn();
     }
 }
 

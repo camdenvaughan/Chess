@@ -10,7 +10,7 @@ public class Board : MonoBehaviour
 
     [SerializeField] private Transform bottomLeftSquareTransform;
     [SerializeField] private float squareSize;
-    [SerializeField] private PromotionPieceCreator promotionCreator;
+    [SerializeField] private PromotionPieceManager promotionManager;
 
     private Piece[,] grid;
     private Piece selectedPiece;
@@ -80,12 +80,8 @@ public class Board : MonoBehaviour
 
     public void CreatePromoteScreen(Piece piece)
     {
-        chessController.PauseGame();
-        promotionCreator.InitAndPlacePieces();
-        promotionCreator.StorePromotionPiece(piece);
-        //promotedPiece = promotionCreator.GetInput();
-
-       // Debug.Log(promotedPiece.name);
+        chessController.PauseGameForPromotion();
+        promotionManager.InitAndPlacePieces(piece);
     }
 
 
@@ -98,7 +94,6 @@ public class Board : MonoBehaviour
 
     private void SelectPiece(Piece piece)
     {
-        //chessController.RemoveMovesEnablingAttackOnPieceOfType<King>(piece);
         selectedPiece = piece;
         List<Vector2Int> selection = selectedPiece.avaliableMoves;
         ShowSelectionSquares(selection);
@@ -129,7 +124,8 @@ public class Board : MonoBehaviour
         selectedPiece.MovePiece(coords);
         lastMovedPiece = selectedPiece;
         DeselectPiece();
-        EndTurn();
+        if (!chessController.CheckPromotion())
+            EndTurn();
     }
 
     private void TryToTakeOppositePiece(Vector2Int coords)

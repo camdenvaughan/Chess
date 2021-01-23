@@ -49,7 +49,6 @@ public class Pawn : Piece
         {
             board.CreatePromoteScreen(this);
         }
-            //board.PromotePiece(this);
     }
 
     private void CheckIfEnPassant()
