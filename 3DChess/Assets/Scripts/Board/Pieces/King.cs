@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class King : Piece
 {
+    // 8 movement directions of a king
     Vector2Int[] directions = new Vector2Int[]
     {
         new Vector2Int(-1, 1),
@@ -17,11 +18,14 @@ public class King : Piece
         new Vector2Int(1, -1),
     };
 
+    // Cordinated for Castling
     private Vector2Int leftCastlingMove;
     private Vector2Int rightCastlingMove;
 
     private Piece leftRook;
     private Piece rightRook;
+
+    // Assign Regular moves, then castling moves if available
     public override List<Vector2Int> SelectAvaliableSquares()
     {
         avaliableMoves.Clear();
@@ -32,19 +36,22 @@ public class King : Piece
 
     private void AssignCastlingMoves()
     {
-        if (hasMoved)
-            return;
-        leftRook = GetPieceInDirection<Rook>(team, Vector2Int.left);
-        if(leftRook && !leftRook.hasMoved)
+        leftCastlingMove = new Vector2Int(-1, -1);
+        rightCastlingMove = new Vector2Int(-1, -1);
+        if (!hasMoved)
         {
-            leftCastlingMove = occupiedSquare + Vector2Int.left * 2;
-            avaliableMoves.Add(leftCastlingMove);
-        }
-        rightRook = GetPieceInDirection<Rook>(team, Vector2Int.right);
-        if (rightRook && !rightRook.hasMoved)
-        {
-            rightCastlingMove = occupiedSquare + Vector2Int.right * 2;
-            avaliableMoves.Add(rightCastlingMove);
+            leftRook = GetPieceInDirection<Rook>(team, Vector2Int.left);
+            if (leftRook && !leftRook.hasMoved)
+            {
+                leftCastlingMove = occupiedSquare + Vector2Int.left * 2;
+                avaliableMoves.Add(leftCastlingMove);
+            }
+            rightRook = GetPieceInDirection<Rook>(team, Vector2Int.right);
+            if (rightRook && !rightRook.hasMoved)
+            {
+                rightCastlingMove = occupiedSquare + Vector2Int.right * 2;
+                avaliableMoves.Add(rightCastlingMove);
+            }
         }
     }
 
@@ -80,11 +87,17 @@ public class King : Piece
         {
             board.UpdateBoardOnPieceMove(coords + Vector2Int.right, leftRook.occupiedSquare, leftRook, null);
             leftRook.MovePiece(coords + Vector2Int.right);
+
+            // Send false to indicate that it is Queenside
+            board.CreateCastlingNotation(false);
         }
         if (coords == rightCastlingMove)
         {
             board.UpdateBoardOnPieceMove(coords + Vector2Int.left, rightRook.occupiedSquare, rightRook, null);
             rightRook.MovePiece(coords + Vector2Int.left);
+
+            // Send true to indicate that it is a kingside
+            board.CreateCastlingNotation(true);
         }
     }
 

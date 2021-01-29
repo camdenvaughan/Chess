@@ -19,7 +19,7 @@ public class ChessPlayer
     public void AddPiece(Piece piece)
     {
         if (!activePieces.Contains(piece))
-            activePieces.Add(piece);  
+            activePieces.Add(piece);
     }
     public void RemovePiece(Piece piece)
     {
@@ -98,4 +98,5 @@ public class ChessPlayer
         }
         return false;
     }
+
 }

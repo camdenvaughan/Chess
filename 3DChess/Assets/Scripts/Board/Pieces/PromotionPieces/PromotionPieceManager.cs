@@ -45,20 +45,19 @@ public class PromotionPieceManager : MonoBehaviour
 
     private void StartPiecePromotion(PromotionPiece piece)
     {
-        string notation = board.XCoordToLetter(promotionPiece.occupiedSquare.x) + (promotionPiece.occupiedSquare.y + 1).ToString();
         switch (piece.pieceName)
         {
             case "queen":
-                PromoteTo(typeof(Queen), notation + "Q");
+                PromoteTo(typeof(Queen));
                 break;
             case "rook":
-                PromoteTo(typeof(Rook), notation + "R");
+                PromoteTo(typeof(Rook));
                 break;
             case "knight":
-                PromoteTo(typeof(Knight), notation + "N");
+                PromoteTo(typeof(Knight));
                 break;
             case "bishop":
-                PromoteTo(typeof(Bishop), notation + "B");
+                PromoteTo(typeof(Bishop));
                 break;
             default:
                 Debug.Log("other");
@@ -67,17 +66,17 @@ public class PromotionPieceManager : MonoBehaviour
     }
 
 
-    private void PromoteTo(Type type, string notation)
+    private void PromoteTo(Type type)
     {
         board.PromotePiece(promotionPiece, type);
-        DestroyPromotionScreen(notation);
+        DestroyPromotionScreen();
     }
 
-    private void DestroyPromotionScreen(string notation)
+    private void DestroyPromotionScreen()
     {
         promotionPiece = null;
         chessController.ResumeGame();
-        chessController.EndTurn(notation);
+        chessController.EndTurn();
         foreach (Transform child in promotionParent.transform)
         {
             GameObject.Destroy(child.gameObject);

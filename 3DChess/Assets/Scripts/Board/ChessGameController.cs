@@ -13,7 +13,6 @@ public class ChessGameController : MonoBehaviour
     [SerializeField] private Board board;
     [SerializeField] private ChessUIManager uIManager;
     [SerializeField] private CameraController cameraController;
-
     [SerializeField] private GameObject pauseUI;
     [SerializeField] private GameObject pauseButton;
 
@@ -22,11 +21,13 @@ public class ChessGameController : MonoBehaviour
     private ChessPlayer whitePlayer;
     private ChessPlayer blackPlayer;
     private ChessPlayer activePlayer;
+    private ChessNotationManager chessNotator;
+
     private GameState state;
 
     private int possibleMoves;
-    private string displayNotation;
 
+    
 
     private void Awake()
     {
@@ -37,6 +38,7 @@ public class ChessGameController : MonoBehaviour
     private void SetDependencies()
     {
         pieceCreator = GetComponent<PieceCreator>();
+        chessNotator = GetComponent<ChessNotationManager>();
     }
 
     private void CreatePlayers()
@@ -52,6 +54,7 @@ public class ChessGameController : MonoBehaviour
 
     private void StartNewGame()
     {
+        
         uIManager.HideUI();
         SetGameState(GameState.Init);
         board.SetDependencies(this);
@@ -59,7 +62,7 @@ public class ChessGameController : MonoBehaviour
         activePlayer = whitePlayer;
         GenerateAllPossiblePlayerMoves(activePlayer);
         SetGameState(GameState.Play);
-        
+
     }
 
     public void RestartGame()
@@ -124,18 +127,20 @@ public class ChessGameController : MonoBehaviour
         return activePlayer.team == team;
     }
 
-    public void EndTurn(string notation)
+    public void EndTurn()
     {
         GenerateAllPossiblePlayerMoves(activePlayer);
         GenerateAllPossiblePlayerMoves(GetOpponentToPlayer(activePlayer));
-        if (CheckIfGameIsFinished(notation))
+        if (CheckIfGameIsFinished())
             EndGameCheckmate();
         else
         {
             ChangeActiveTeam();
             if (CheckIfStalemate())
                 EndGameStalemate();
-            Debug.Log(displayNotation);
+
+            chessNotator.CombineNotation();
+
             cameraController.MoveCamera();
         }
             
@@ -154,9 +159,9 @@ public class ChessGameController : MonoBehaviour
         return false;
     }
 
-    private bool CheckIfGameIsFinished(string notation)
+    private bool CheckIfGameIsFinished()
     {
-        displayNotation = notation;
+        
         Piece[] kingAttackingPieces = activePlayer.GetPiecesAttackingOppositePieceOfType<King>();
         if(kingAttackingPieces.Length > 0 )
         {
@@ -170,12 +175,12 @@ public class ChessGameController : MonoBehaviour
                 bool canCoverKing = oppositePlayer.CanHidePieceFromAttack<King>(activePlayer);
                 if (!canCoverKing)
                 {
-                    displayNotation = notation + "#";
+                    chessNotator.AddCheckOrMate("#");
+                    chessNotator.CombineNotation();
                     return true;
                 }
-                    
             }
-            displayNotation = notation + "+";
+            chessNotator.AddCheckOrMate("+");
         }
         return false;
     }
@@ -194,49 +199,7 @@ public class ChessGameController : MonoBehaviour
         return false;
     }
 
-    public string CheckDisambiguatingMoves(Piece piece, Vector2Int oldCoords)
-    {       
-        string notation = "";
-        
-        List<Piece> activePieces = new List<Piece>();
-        List<Piece> disambiguousPieces = new List<Piece>();
 
-        foreach (var p in activePlayer.activePieces)
-        {
-           if (p.CompareTag(piece.tag))
-                activePieces.Add(p);
-        }
-
-         foreach (var p in activePieces)
-         {
-  
-            foreach (var move in p.avaliableMoves.ToList())
-             {
-                
-                 if (move == piece.occupiedSquare)
-                 {
-                    disambiguousPieces.Add(p);
-                 }
-             } 
-         }
-        if (disambiguousPieces.Count > 1)
-        {
-            foreach (var p in disambiguousPieces.ToList())
-            {
-                if (p.occupiedSquare.y == oldCoords.y)
-                {
-                    notation += (board.XCoordToLetter(oldCoords.x));
-                }
-
-                if (p.occupiedSquare.x == oldCoords.x)
-                {
-                    Debug.Log(oldCoords.y);
-                    notation += (oldCoords.y + 1).ToString();
-                }
-            }
-        } 
-        return notation;
-    }
 
     public void OnPieceRemoved(Piece piece)
     {
@@ -305,6 +268,24 @@ public class ChessGameController : MonoBehaviour
     public void ResumeGame()
     {
         SetGameState(GameState.Play);
+    }
+    public List<Piece> PiecesAttackingSquare(Vector2Int coords)
+    {
+        List<Piece> allPiecesOnBoard = new List<Piece>();
+        allPiecesOnBoard.AddRange(activePlayer.activePieces);
+        allPiecesOnBoard.AddRange(GetOpponentToPlayer(activePlayer).activePieces);
+        List<Piece> piecesAttackingSquare = new List<Piece>();
+
+        foreach  (Piece piece in allPiecesOnBoard)
+        {
+            foreach (Vector2Int move in piece.avaliableMoves)
+            {
+                if (move == coords && !piecesAttackingSquare.Contains(piece))
+                    piecesAttackingSquare.Add(piece);
+            }
+         
+        }
+        return piecesAttackingSquare;
     }
 }
 

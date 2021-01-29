@@ -7,16 +7,18 @@ using UnityEngine;
 public class Board : MonoBehaviour
 {
     public const int BOARD_SIZE = 8;
-    private const string letters = "abcdefgh";
+
 
     [SerializeField] private Transform bottomLeftSquareTransform;
     [SerializeField] private float squareSize;
     [SerializeField] private PromotionPieceManager promotionManager;
+    [SerializeField] private ChessNotationManager chessNotator;
 
     private Piece[,] grid;
     private Piece selectedPiece;
     private ChessGameController chessController;
     private SquareSelectorCreator squareSelector;
+
     [HideInInspector] public Piece lastMovedPiece;
 
     [HideInInspector] public Vector2Int possibleEnPassant;
@@ -91,6 +93,7 @@ public class Board : MonoBehaviour
     {
         TakePiece(promotionPiece);
         chessController.CreatePieceAndInitialize(promotionPiece.occupiedSquare, promotionPiece.team, type);
+        chessNotator.AddPromotionNotation(type);
     }
 
     private void SelectPiece(Piece piece)
@@ -119,103 +122,36 @@ public class Board : MonoBehaviour
 
     private void OnSelectedPieceMoved(Vector2Int coords, Piece piece)
     {
-        Vector2Int oldCoords = piece.occupiedSquare;
-        bool wasPieceTaken = TryToTakeOppositePiece(coords);
+        chessNotator.NotateSquareCoord(coords, piece);
+        TryToTakeOppositePiece(coords);
         UpdateBoardOnPieceMove(coords, piece.occupiedSquare, piece, null);
         selectedPiece.MovePiece(coords);
         lastMovedPiece = selectedPiece;
         DeselectPiece();
         if (!chessController.CheckPromotion())
-            chessController.EndTurn(CreateChessNotation(coords, oldCoords, wasPieceTaken, piece));
+            chessController.EndTurn();
         
     }
 
-    private string CreateChessNotation(Vector2Int newCoords,Vector2Int oldCoords, bool wasPieceTaken, Piece piece)
-    {
-        // Convert Grid coords to Chess Coords
-        int coordYValue = newCoords.y + 1;
-        string notation = (XCoordToLetter(newCoords.x) + coordYValue.ToString());
 
-        // Add x if a piece was taken
-        if (wasPieceTaken)
-            notation = ("x" + notation);
 
-        // Check for Disambiguating Moves
-        
 
-        switch (piece.GetType().ToString())
-        {
-            case "Pawn":
-                if (possibleEnPassant != null && newCoords == possibleEnPassant)
-                {
-                    notation = (XCoordToLetter(oldCoords.x) + notation);
-                }
-
-                break;
-            case "King":
-                Vector2Int kingSideCoords;
-                Vector2Int queenSideCoords;
-                if (piece.team == TeamColor.White)
-                {
-                    kingSideCoords = oldCoords + Vector2Int.right * 2;
-                    queenSideCoords = oldCoords + Vector2Int.left * 2;
-                } else
-                {
-                    kingSideCoords = oldCoords + Vector2Int.left * 2;
-                    queenSideCoords = oldCoords + Vector2Int.right * 2;
-                }
-                if (newCoords == kingSideCoords)
-                {
-                    notation = ("0-0");
-                    break;
-                }
-                else if (newCoords == queenSideCoords)
-                {
-                    notation = ("0-0-0");
-                    break;
-                } else
-                {
-                    notation = ("K" + notation);
-                    break;
-                }
-            case "Bishop":
-                notation = ("B" + notation);
-                break;
-            case "Knight":
-                notation = ("N" + notation);
-                break;
-            case "Rook":
-                notation = ("R" + notation);
-                break;
-            case "Queen":
-                notation = ("Q" + notation);
-                break;
-            default:
-                break;
-        }
-        return notation;
-    }
-    public string XCoordToLetter(int xCoord)
-    {
-        var coordXletter = "";
-        return coordXletter += letters[xCoord % letters.Length];
-    }
-
-    private bool TryToTakeOppositePiece(Vector2Int coords)
+    private void TryToTakeOppositePiece(Vector2Int coords)
     {
 
         Piece piece = GetPieceOnSquare(coords);
         if (piece != null && !selectedPiece.IsFromSameTeam(piece))
         {
             TakePiece(piece);
-            return true;
+            
         }
         else if (possibleEnPassant != null && coords == possibleEnPassant)
         {
             TakePiece(passantPawn);
-            return true;
-        } else
-        return false;
+            chessNotator.AddPassantNotation();
+            
+        }
+        
     }
 
     private void TakePiece(Piece piece)
@@ -224,6 +160,7 @@ public class Board : MonoBehaviour
         {
             grid[piece.occupiedSquare.x, piece.occupiedSquare.y] = null;
             chessController.OnPieceRemoved(piece);
+            chessNotator.AddCaptureNotation();
         }
     }
 
@@ -261,7 +198,20 @@ public class Board : MonoBehaviour
         }
         return false;
     }
+    public void CreateCastlingNotation(bool isCastledKingSide)
+    {
+        if (isCastledKingSide)
+        {
+            // Send KingSide Notation
+            chessNotator.Castle("0-0");
+        }
+        else if (!isCastledKingSide)
+        {
+            // Send QueenSide Notation
+            chessNotator.Castle("0-0-0");
+        }
 
+    }
     public void SetPieceOnBoard(Vector2Int coords, Piece piece)
     {
         if (CheckIfCoordsAreOnBoard(coords))

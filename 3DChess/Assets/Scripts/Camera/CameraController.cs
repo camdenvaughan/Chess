@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
 
             StartCoroutine(LerpFromTo());
 
-        yield return new WaitForSeconds(cameraMovementWaitTime);
+        
     }
 
     IEnumerator LerpFromTo()
