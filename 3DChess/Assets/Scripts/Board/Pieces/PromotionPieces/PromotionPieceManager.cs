@@ -14,7 +14,6 @@ public class PromotionPieceManager : MonoBehaviour
     [SerializeField] private Material blackMaterial;
 
     private Piece promotionPiece;
-    private PromotionPiece pickedPiece;
 
     public void InitAndPlacePieces(Piece piece)
     {
@@ -36,30 +35,30 @@ public class PromotionPieceManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
 
-                if (hit.transform.gameObject.tag == "PromotionPiece")
+                if (hit.transform.gameObject.CompareTag("PromotionPiece"))
                 {
-                    StartPiecePromotion(hit.transform.gameObject);
+                    StartPiecePromotion(hit.transform.gameObject.GetComponent<PromotionPiece>());
                 }
             }
         }
     }
 
-    private void StartPiecePromotion(GameObject piece)
+    private void StartPiecePromotion(PromotionPiece piece)
     {
-        pickedPiece = piece.GetComponent<PromotionPiece>();
-        switch (pickedPiece.pieceName)
+        string notation = board.XCoordToLetter(promotionPiece.occupiedSquare.x) + (promotionPiece.occupiedSquare.y + 1).ToString();
+        switch (piece.pieceName)
         {
             case "queen":
-                PromoteTo(typeof(Queen));
+                PromoteTo(typeof(Queen), notation + "Q");
                 break;
             case "rook":
-                PromoteTo(typeof(Rook));
+                PromoteTo(typeof(Rook), notation + "R");
                 break;
             case "knight":
-                PromoteTo(typeof(Knight));
+                PromoteTo(typeof(Knight), notation + "N");
                 break;
             case "bishop":
-                PromoteTo(typeof(Bishop));
+                PromoteTo(typeof(Bishop), notation + "B");
                 break;
             default:
                 Debug.Log("other");
@@ -68,16 +67,17 @@ public class PromotionPieceManager : MonoBehaviour
     }
 
 
-    private void PromoteTo(Type type)
+    private void PromoteTo(Type type, string notation)
     {
         board.PromotePiece(promotionPiece, type);
-        DestroyPromotionScreen();
+        DestroyPromotionScreen(notation);
     }
 
-    private void DestroyPromotionScreen()
+    private void DestroyPromotionScreen(string notation)
     {
         promotionPiece = null;
-        chessController.ResumeGameFromPromotion();
+        chessController.ResumeGame();
+        chessController.EndTurn(notation);
         foreach (Transform child in promotionParent.transform)
         {
             GameObject.Destroy(child.gameObject);

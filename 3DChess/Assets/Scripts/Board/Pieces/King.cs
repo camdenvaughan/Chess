@@ -73,11 +73,10 @@ public class King : Piece
             }
         }
     }
-
     public override void MovePiece(Vector2Int coords)
     {
         base.MovePiece(coords);
-        if(coords == leftCastlingMove)
+        if (coords == leftCastlingMove)
         {
             board.UpdateBoardOnPieceMove(coords + Vector2Int.right, leftRook.occupiedSquare, leftRook, null);
             leftRook.MovePiece(coords + Vector2Int.right);
@@ -88,4 +87,5 @@ public class King : Piece
             rightRook.MovePiece(coords + Vector2Int.left);
         }
     }
-}
+
+ }

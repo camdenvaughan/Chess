@@ -7,12 +7,15 @@ using UnityEngine;
 [RequireComponent(typeof(PieceCreator))]
 public class ChessGameController : MonoBehaviour
 {
-    private enum GameState { Init, Play, Pause, Finished }
+    private enum GameState { Init, Play, Promotion, Pause, Finished }
 
     [SerializeField] private BoardLayout startingBoardLayout;
     [SerializeField] private Board board;
     [SerializeField] private ChessUIManager uIManager;
     [SerializeField] private CameraController cameraController;
+
+    [SerializeField] private GameObject pauseUI;
+    [SerializeField] private GameObject pauseButton;
 
 
     private PieceCreator pieceCreator;
@@ -22,6 +25,7 @@ public class ChessGameController : MonoBehaviour
     private GameState state;
 
     private int possibleMoves;
+    private string displayNotation;
 
 
     private void Awake()
@@ -120,17 +124,18 @@ public class ChessGameController : MonoBehaviour
         return activePlayer.team == team;
     }
 
-    public void EndTurn()
+    public void EndTurn(string notation)
     {
         GenerateAllPossiblePlayerMoves(activePlayer);
         GenerateAllPossiblePlayerMoves(GetOpponentToPlayer(activePlayer));
-        if (CheckIfGameIsFinished())
+        if (CheckIfGameIsFinished(notation))
             EndGameCheckmate();
         else
         {
             ChangeActiveTeam();
             if (CheckIfStalemate())
                 EndGameStalemate();
+            Debug.Log(displayNotation);
             cameraController.MoveCamera();
         }
             
@@ -149,8 +154,9 @@ public class ChessGameController : MonoBehaviour
         return false;
     }
 
-    private bool CheckIfGameIsFinished()
+    private bool CheckIfGameIsFinished(string notation)
     {
+        displayNotation = notation;
         Piece[] kingAttackingPieces = activePlayer.GetPiecesAttackingOppositePieceOfType<King>();
         if(kingAttackingPieces.Length > 0 )
         {
@@ -163,8 +169,13 @@ public class ChessGameController : MonoBehaviour
             {
                 bool canCoverKing = oppositePlayer.CanHidePieceFromAttack<King>(activePlayer);
                 if (!canCoverKing)
+                {
+                    displayNotation = notation + "#";
                     return true;
+                }
+                    
             }
+            displayNotation = notation + "+";
         }
         return false;
     }
@@ -181,6 +192,50 @@ public class ChessGameController : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public string CheckDisambiguatingMoves(Piece piece, Vector2Int oldCoords)
+    {       
+        string notation = "";
+        
+        List<Piece> activePieces = new List<Piece>();
+        List<Piece> disambiguousPieces = new List<Piece>();
+
+        foreach (var p in activePlayer.activePieces)
+        {
+           if (p.CompareTag(piece.tag))
+                activePieces.Add(p);
+        }
+
+         foreach (var p in activePieces)
+         {
+  
+            foreach (var move in p.avaliableMoves.ToList())
+             {
+                
+                 if (move == piece.occupiedSquare)
+                 {
+                    disambiguousPieces.Add(p);
+                 }
+             } 
+         }
+        if (disambiguousPieces.Count > 1)
+        {
+            foreach (var p in disambiguousPieces.ToList())
+            {
+                if (p.occupiedSquare.y == oldCoords.y)
+                {
+                    notation += (board.XCoordToLetter(oldCoords.x));
+                }
+
+                if (p.occupiedSquare.x == oldCoords.x)
+                {
+                    Debug.Log(oldCoords.y);
+                    notation += (oldCoords.y + 1).ToString();
+                }
+            }
+        } 
+        return notation;
     }
 
     public void OnPieceRemoved(Piece piece)
@@ -225,14 +280,31 @@ public class ChessGameController : MonoBehaviour
             return false;
     }
 
-    public void PauseGameForPromotion()
+
+
+    public void ShowPauseScreen()
+    {
+        pauseUI.SetActive(true);
+        pauseButton.SetActive(false);
+    }
+
+    public void HidePauseScreen()
+    {
+        pauseUI.SetActive(false);
+        pauseButton.SetActive(true);
+    }
+    public void PauseGame()
     {
         SetGameState(GameState.Pause);
     }
-    public void ResumeGameFromPromotion()
+
+    public void SetToPromotionState()
+    {
+        SetGameState(GameState.Promotion);
+    }
+    public void ResumeGame()
     {
         SetGameState(GameState.Play);
-        EndTurn();
     }
 }
 

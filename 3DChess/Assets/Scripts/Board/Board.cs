@@ -7,6 +7,7 @@ using UnityEngine;
 public class Board : MonoBehaviour
 {
     public const int BOARD_SIZE = 8;
+    private const string letters = "abcdefgh";
 
     [SerializeField] private Transform bottomLeftSquareTransform;
     [SerializeField] private float squareSize;
@@ -80,7 +81,7 @@ public class Board : MonoBehaviour
 
     public void CreatePromoteScreen(Piece piece)
     {
-        chessController.PauseGameForPromotion();
+        chessController.SetToPromotionState();
         promotionManager.InitAndPlacePieces(piece);
     }
 
@@ -118,21 +119,103 @@ public class Board : MonoBehaviour
 
     private void OnSelectedPieceMoved(Vector2Int coords, Piece piece)
     {
-        TryToTakeOppositePiece(coords);
-        TryToEnPassant(coords);
+        Vector2Int oldCoords = piece.occupiedSquare;
+        bool wasPieceTaken = TryToTakeOppositePiece(coords);
         UpdateBoardOnPieceMove(coords, piece.occupiedSquare, piece, null);
         selectedPiece.MovePiece(coords);
         lastMovedPiece = selectedPiece;
         DeselectPiece();
         if (!chessController.CheckPromotion())
-            EndTurn();
+            chessController.EndTurn(CreateChessNotation(coords, oldCoords, wasPieceTaken, piece));
+        
     }
 
-    private void TryToTakeOppositePiece(Vector2Int coords)
+    private string CreateChessNotation(Vector2Int newCoords,Vector2Int oldCoords, bool wasPieceTaken, Piece piece)
     {
+        // Convert Grid coords to Chess Coords
+        int coordYValue = newCoords.y + 1;
+        string notation = (XCoordToLetter(newCoords.x) + coordYValue.ToString());
+
+        // Add x if a piece was taken
+        if (wasPieceTaken)
+            notation = ("x" + notation);
+
+        // Check for Disambiguating Moves
+        
+
+        switch (piece.GetType().ToString())
+        {
+            case "Pawn":
+                if (possibleEnPassant != null && newCoords == possibleEnPassant)
+                {
+                    notation = (XCoordToLetter(oldCoords.x) + notation);
+                }
+
+                break;
+            case "King":
+                Vector2Int kingSideCoords;
+                Vector2Int queenSideCoords;
+                if (piece.team == TeamColor.White)
+                {
+                    kingSideCoords = oldCoords + Vector2Int.right * 2;
+                    queenSideCoords = oldCoords + Vector2Int.left * 2;
+                } else
+                {
+                    kingSideCoords = oldCoords + Vector2Int.left * 2;
+                    queenSideCoords = oldCoords + Vector2Int.right * 2;
+                }
+                if (newCoords == kingSideCoords)
+                {
+                    notation = ("0-0");
+                    break;
+                }
+                else if (newCoords == queenSideCoords)
+                {
+                    notation = ("0-0-0");
+                    break;
+                } else
+                {
+                    notation = ("K" + notation);
+                    break;
+                }
+            case "Bishop":
+                notation = ("B" + notation);
+                break;
+            case "Knight":
+                notation = ("N" + notation);
+                break;
+            case "Rook":
+                notation = ("R" + notation);
+                break;
+            case "Queen":
+                notation = ("Q" + notation);
+                break;
+            default:
+                break;
+        }
+        return notation;
+    }
+    public string XCoordToLetter(int xCoord)
+    {
+        var coordXletter = "";
+        return coordXletter += letters[xCoord % letters.Length];
+    }
+
+    private bool TryToTakeOppositePiece(Vector2Int coords)
+    {
+
         Piece piece = GetPieceOnSquare(coords);
         if (piece != null && !selectedPiece.IsFromSameTeam(piece))
+        {
             TakePiece(piece);
+            return true;
+        }
+        else if (possibleEnPassant != null && coords == possibleEnPassant)
+        {
+            TakePiece(passantPawn);
+            return true;
+        } else
+        return false;
     }
 
     private void TakePiece(Piece piece)
@@ -144,23 +227,11 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void EndTurn()
-    {
-        chessController.EndTurn();
-    }
 
     public void UpdateBoardOnPieceMove(Vector2Int newCoords, Vector2Int oldCoords, Piece newPiece, Piece oldPiece)
     {
         grid[oldCoords.x, oldCoords.y] = oldPiece;
         grid[newCoords.x, newCoords.y] = newPiece;
-    }
-
-    private void TryToEnPassant(Vector2Int coords)
-    {
-        if (possibleEnPassant != null && coords == possibleEnPassant)
-        {
-            TryToTakeOppositePiece(passantPawn.occupiedSquare);
-        }
     }
 
 
@@ -196,9 +267,5 @@ public class Board : MonoBehaviour
         if (CheckIfCoordsAreOnBoard(coords))
             grid[coords.x, coords.y] = piece;
     }
-    
-    
-
-    
 }
 

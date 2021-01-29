@@ -5,6 +5,12 @@ TagManager:
   serializedVersion: 2
   tags:
   - PromotionPiece
+  - Bishop
+  - King
+  - Knight
+  - Pawn
+  - Queen
+  - Rook
   layers:
   - Default
   - TransparentFX

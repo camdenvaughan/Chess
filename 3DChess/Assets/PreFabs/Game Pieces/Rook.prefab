@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -407056877631149589}
   m_Layer: 0
   m_Name: Rook
-  m_TagString: Untagged
+  m_TagString: Rook
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
