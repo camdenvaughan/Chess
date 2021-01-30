@@ -5,10 +5,9 @@ using UnityEngine;
 
 public class ChessNotationManager : MonoBehaviour
 {
-    private const string letters = "abcdefgh";
+    private int moveNumber;
 
-    private Board board;
-    private ChessGameController chessController;
+    private const string letters = "abcdefgh";
 
     private string newChessCoord;
     private string typeNotation;
@@ -22,7 +21,6 @@ public class ChessNotationManager : MonoBehaviour
     private string printNotation;
 
     private Piece currentPiece;
-
 
     public void NotateSquareCoord(Vector2Int coords, Piece piece)
     {
@@ -80,11 +78,6 @@ public class ChessNotationManager : MonoBehaviour
                 break;
         }
     }
-    public void AddDisambiguousNotation()
-    {
-
-    }
-
 
     public void AddCheckOrMate(string symbol)
     {
@@ -95,15 +88,20 @@ public class ChessNotationManager : MonoBehaviour
     {
         castleNotation = castleSide;
     }
-
+    public void UpdateMoveNumber()
+    {
+        moveNumber++;
+    }
     public void CombineNotation()
     {
         if (castleNotation == null)
         {
-            Debug.Log(printNotation = typeNotation + oldFile + oldRank + take + newChessCoord + promotionSymbol + checkOrMate);
+            printNotation = moveNumber.ToString() + ". " + typeNotation + oldFile + oldRank + take + newChessCoord + promotionSymbol + checkOrMate;
         }
         else
-            Debug.Log(castleNotation);
+            printNotation = moveNumber.ToString() + ". " + castleNotation;
+
+        Debug.Log(printNotation);
         ClearStringsAndPiece();
     }
 
@@ -118,52 +116,11 @@ public class ChessNotationManager : MonoBehaviour
         castleNotation = null;
         checkOrMate = null;
         currentPiece = null;
-}
+        printNotation = null;
+    }
 
 
-    //public string CheckDisambiguatingMoves(Piece piece, Vector2Int oldCoords)
-    //{
-    //    string notation = "";
 
-    //    List<Piece> activePieces = new List<Piece>();
-    //    List<Piece> disambiguousPieces = new List<Piece>();
-
-    //    foreach (var p in activePlayer.activePieces)
-    //    {
-    //        if (p.CompareTag(piece.tag))
-    //            activePieces.Add(p);
-    //    }
-
-    //    foreach (var p in activePieces)
-    //    {
-
-    //        foreach (var move in p.avaliableMoves.ToList())
-    //        {
-
-    //            if (move == piece.occupiedSquare)
-    //            {
-    //                disambiguousPieces.Add(p);
-    //            }
-    //        }
-    //    }
-    //    if (disambiguousPieces.Count > 1)
-    //    {
-    //        foreach (var p in disambiguousPieces.ToList())
-    //        {
-    //            if (p.occupiedSquare.y == oldCoords.y)
-    //            {
-    //                notation += (XCoordToLetter(oldCoords.x));
-    //            }
-
-    //            if (p.occupiedSquare.x == oldCoords.x)
-    //            {
-    //                Debug.Log(oldCoords.y);
-    //                notation += (oldCoords.y + 1).ToString();
-    //            }
-    //        }
-    //    }
-    //    return notation;
-    //}
     public string XCoordToLetter(int xCoord)
     {
         var coordXletter = "";

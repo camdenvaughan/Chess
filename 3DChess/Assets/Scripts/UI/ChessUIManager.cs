@@ -9,6 +9,7 @@ public class ChessUIManager : MonoBehaviour
     [SerializeField] private GameObject UIParent;
     [SerializeField] private Text resultText;
 
+
     public void HideUI()
     {
         UIParent.SetActive(false);

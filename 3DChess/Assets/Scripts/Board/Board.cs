@@ -128,6 +128,8 @@ public class Board : MonoBehaviour
         selectedPiece.MovePiece(coords);
         lastMovedPiece = selectedPiece;
         DeselectPiece();
+        if (chessController.IsTeamTurnActive(TeamColor.White))
+            chessNotator.UpdateMoveNumber();
         if (!chessController.CheckPromotion())
             chessController.EndTurn();
         

@@ -54,15 +54,14 @@ public class ChessGameController : MonoBehaviour
 
     private void StartNewGame()
     {
-        
         uIManager.HideUI();
         SetGameState(GameState.Init);
         board.SetDependencies(this);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
+        //chessNotator.UpdateMoveNumber();
         GenerateAllPossiblePlayerMoves(activePlayer);
         SetGameState(GameState.Play);
-
     }
 
     public void RestartGame()
@@ -140,7 +139,6 @@ public class ChessGameController : MonoBehaviour
                 EndGameStalemate();
 
             chessNotator.CombineNotation();
-
             cameraController.MoveCamera();
         }
             
@@ -224,6 +222,8 @@ public class ChessGameController : MonoBehaviour
     private void ChangeActiveTeam()
     {
         activePlayer = activePlayer == whitePlayer ? blackPlayer : whitePlayer;
+
+
     }
 
     private ChessPlayer GetOpponentToPlayer(ChessPlayer player)
@@ -235,15 +235,6 @@ public class ChessGameController : MonoBehaviour
     {
         activePlayer.RemoveMovesEnablingAttackOnPiece<T>(GetOpponentToPlayer(activePlayer), piece);
     }
-    public bool IsActiveTeamWhite()
-    {
-        if (activePlayer == whitePlayer)
-            return true;
-        else
-            return false;
-    }
-
-
 
     public void ShowPauseScreen()
     {
@@ -268,24 +259,6 @@ public class ChessGameController : MonoBehaviour
     public void ResumeGame()
     {
         SetGameState(GameState.Play);
-    }
-    public List<Piece> PiecesAttackingSquare(Vector2Int coords)
-    {
-        List<Piece> allPiecesOnBoard = new List<Piece>();
-        allPiecesOnBoard.AddRange(activePlayer.activePieces);
-        allPiecesOnBoard.AddRange(GetOpponentToPlayer(activePlayer).activePieces);
-        List<Piece> piecesAttackingSquare = new List<Piece>();
-
-        foreach  (Piece piece in allPiecesOnBoard)
-        {
-            foreach (Vector2Int move in piece.avaliableMoves)
-            {
-                if (move == coords && !piecesAttackingSquare.Contains(piece))
-                    piecesAttackingSquare.Add(piece);
-            }
-         
-        }
-        return piecesAttackingSquare;
     }
 }
 

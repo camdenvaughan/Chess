@@ -29,9 +29,9 @@ public class CameraController : MonoBehaviour
     IEnumerator LerpFromTo()
     {
         yield return new WaitForSeconds(cameraMovementWaitTime);
-        if (chessController.IsActiveTeamWhite())
+        if (chessController.IsTeamTurnActive(TeamColor.White))
             yValue = 0;
-        else if (!chessController.IsActiveTeamWhite())
+        else if (chessController.IsTeamTurnActive(TeamColor.Black))
             yValue = 180;
 
         for (float t = 0f; t < spinSpeed; t += Time.deltaTime)

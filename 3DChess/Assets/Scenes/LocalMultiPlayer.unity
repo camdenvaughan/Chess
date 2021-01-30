@@ -1103,7 +1103,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 293125071}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d43b0a060d675d408ffada25e441b78, type: 3}
+  m_Script: {fileID: 11500000, guid: c8cf963caf3c4d544ab60e169cb2cbbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &293832869 stripped
@@ -1827,6 +1827,7 @@ MonoBehaviour:
   bottomLeftSquareTransform: {fileID: 1335329640}
   squareSize: 0.075
   promotionManager: {fileID: 2000344897}
+  chessNotator: {fileID: 293125075}
   lastMovedPiece: {fileID: 0}
   possibleEnPassant: {x: 0, y: 0}
   passantPawn: {fileID: 0}
