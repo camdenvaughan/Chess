@@ -8,24 +8,29 @@ using UnityEngine;
 [RequireComponent(typeof(IObjectTweener))]
 public abstract class Piece : MonoBehaviour
 {
+    private IObjectTweener tweener;
     private MaterialSetter materialSetter;
     public Board board { protected get; set; }
     public Vector2Int occupiedSquare { get; set; }
     public TeamColor team { get; set; }
     public bool hasMoved { get; private set; }
+
     public List<Vector2Int> avaliableMoves;
 
-    private IObjectTweener tweener;
 
     public abstract List<Vector2Int> SelectAvaliableSquares();
 
     private void Awake()
     {
+        SetDependencies();
         avaliableMoves = new List<Vector2Int>();
-        tweener = GetComponent<IObjectTweener>();
-        materialSetter = GetComponent<MaterialSetter>();
         hasMoved = false;
     }
+    private void SetDependencies()
+    {
+        tweener = GetComponent<IObjectTweener>();
+        materialSetter = GetComponent<MaterialSetter>();
+    }    
     public void SetMaterial(Material material)
     {
         if (materialSetter == null)

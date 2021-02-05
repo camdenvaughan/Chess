@@ -22,6 +22,7 @@ public class MenuController : MonoBehaviour
     private void SetDependencies()
     {
         pieceCreator = GetComponent<PieceCreator>();
+        board.SetDependencies();
     }
     private void Start()
     {
@@ -61,4 +62,5 @@ public class MenuController : MonoBehaviour
         thisUI.SetActive(false);
         menuUI.SetActive(true);
     }
+
 }

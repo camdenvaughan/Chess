@@ -37,38 +37,15 @@ public class PromotionPieceManager : MonoBehaviour
 
                 if (hit.transform.gameObject.CompareTag("PromotionPiece"))
                 {
-                    StartPiecePromotion(hit.transform.gameObject.GetComponent<PromotionPiece>());
+                    PromoteTo(hit.transform.gameObject.GetComponent<PromotionPiece>().piece);
                 }
             }
         }
     }
 
-    private void StartPiecePromotion(PromotionPiece piece)
+    private void PromoteTo(Piece piece)
     {
-        switch (piece.pieceName)
-        {
-            case "queen":
-                PromoteTo(typeof(Queen));
-                break;
-            case "rook":
-                PromoteTo(typeof(Rook));
-                break;
-            case "knight":
-                PromoteTo(typeof(Knight));
-                break;
-            case "bishop":
-                PromoteTo(typeof(Bishop));
-                break;
-            default:
-                Debug.Log("other");
-                break;
-        }
-    }
-
-
-    private void PromoteTo(Type type)
-    {
-        board.PromotePiece(promotionPiece, type);
+        board.PromotePiece(promotionPiece, piece.GetType());
         DestroyPromotionScreen();
     }
 

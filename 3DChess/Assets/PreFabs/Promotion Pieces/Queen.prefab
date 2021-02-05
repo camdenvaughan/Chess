@@ -123,3 +123,4 @@ MonoBehaviour:
   pieceName: queen
   rotationSpeed: 0.4
   initXValue: -0.15
+  piece: {fileID: -7253163047601134057, guid: 6f38c700bedefe64f8364436528e5c3d, type: 3}

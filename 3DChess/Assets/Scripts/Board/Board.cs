@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 [RequireComponent(typeof(SquareSelectorCreator))]
 public class Board : MonoBehaviour
@@ -12,12 +13,16 @@ public class Board : MonoBehaviour
     [SerializeField] private Transform bottomLeftSquareTransform;
     [SerializeField] private float squareSize;
     [SerializeField] private PromotionPieceManager promotionManager;
-    [SerializeField] private ChessNotationManager chessNotator;
+    [SerializeField] private GameObject audioManagerPrefab;
+    private ChessNotationManager chessNotator;
+
 
     private Piece[,] grid;
     private Piece selectedPiece;
     private ChessGameController chessController;
     private SquareSelectorCreator squareSelector;
+    private AudioManager audioManager;
+
 
     [HideInInspector] public Piece lastMovedPiece;
 
@@ -28,11 +33,26 @@ public class Board : MonoBehaviour
     {
         squareSelector = GetComponent<SquareSelectorCreator>();
         CreateGrid();
+
     }
 
     public void SetDependencies(ChessGameController chessController)
     {
         this.chessController = chessController;
+        if (FindObjectOfType<AudioManager>() == null)
+            Instantiate(audioManagerPrefab);
+        audioManager = FindObjectOfType<AudioManager>().GetComponent<AudioManager>();
+    }
+    public void SetDependencies()
+    {
+        if (FindObjectOfType<AudioManager>() == null)
+            Instantiate(audioManagerPrefab);
+        audioManager = FindObjectOfType<AudioManager>().GetComponent<AudioManager>();
+    }
+
+    public void SetUIDependencies(ChessNotationManager chessNotationManager)
+    {
+        chessNotator = chessNotationManager;
     }
 
     private void CreateGrid()
@@ -132,11 +152,13 @@ public class Board : MonoBehaviour
             chessNotator.UpdateMoveNumber();
         if (!chessController.CheckPromotion())
             chessController.EndTurn();
-        
+        PlayPieceSound();
     }
 
-
-
+    private void PlayPieceSound()
+    {
+        audioManager.Play("move");
+    }
 
     private void TryToTakeOppositePiece(Vector2Int coords)
     {
@@ -219,5 +241,6 @@ public class Board : MonoBehaviour
         if (CheckIfCoordsAreOnBoard(coords))
             grid[coords.x, coords.y] = piece;
     }
+
 }
 

@@ -2,10 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ChessNotationManager : MonoBehaviour
 {
     private int moveNumber;
+    private int lastMoveNumber;
+
+    [SerializeField] Text notationText;
+    [SerializeField] ScrollRect scrollRect;
+    [SerializeField] float scrollUpdateAmount;
 
     private const string letters = "abcdefgh";
 
@@ -17,8 +23,6 @@ public class ChessNotationManager : MonoBehaviour
     private string promotionSymbol;
     private string castleNotation;
     private string checkOrMate;
-
-    private string printNotation;
 
     private Piece currentPiece;
 
@@ -91,18 +95,34 @@ public class ChessNotationManager : MonoBehaviour
     public void UpdateMoveNumber()
     {
         moveNumber++;
+
     }
     public void CombineNotation()
     {
-        if (castleNotation == null)
+        string printNotation;
+        string displayMove;
+        if (lastMoveNumber == moveNumber)
+            displayMove = "";
+        else
+            displayMove = "      " + moveNumber.ToString() + ".  ";
+
+        if (castleNotation == null )
         {
-            printNotation = moveNumber.ToString() + ". " + typeNotation + oldFile + oldRank + take + newChessCoord + promotionSymbol + checkOrMate;
+            printNotation = displayMove + typeNotation + oldFile + oldRank + take + newChessCoord + promotionSymbol + checkOrMate;
         }
         else
-            printNotation = moveNumber.ToString() + ". " + castleNotation;
+            printNotation = displayMove + castleNotation;
 
-        Debug.Log(printNotation);
+        lastMoveNumber = moveNumber;
+
+        PrintNotation(printNotation);
+        ScrollTextRight();
         ClearStringsAndPiece();
+    }
+
+    private void PrintNotation(string printNotation)
+    {
+        notationText.text += printNotation + "    ";
     }
 
     private void ClearStringsAndPiece()
@@ -116,10 +136,13 @@ public class ChessNotationManager : MonoBehaviour
         castleNotation = null;
         checkOrMate = null;
         currentPiece = null;
-        printNotation = null;
     }
 
-
+    private void ScrollTextRight()
+    {
+        Canvas.ForceUpdateCanvases();
+        scrollRect.horizontalNormalizedPosition = scrollUpdateAmount;
+    }
 
     public string XCoordToLetter(int xCoord)
     {

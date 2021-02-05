@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PieceCreator))]
 public class ChessGameController : MonoBehaviour
@@ -11,34 +12,38 @@ public class ChessGameController : MonoBehaviour
 
     [SerializeField] private BoardLayout startingBoardLayout;
     [SerializeField] private Board board;
-    [SerializeField] private ChessUIManager uIManager;
     [SerializeField] private CameraController cameraController;
-    [SerializeField] private GameObject pauseUI;
-    [SerializeField] private GameObject pauseButton;
+    private ChessNotationManager chessNotator;
+
 
 
     private PieceCreator pieceCreator;
     private ChessPlayer whitePlayer;
     private ChessPlayer blackPlayer;
     private ChessPlayer activePlayer;
-    private ChessNotationManager chessNotator;
+
+    private Scene sceneUI;
+    private UINavigator navigatorUI;
+
+    
+
 
     private GameState state;
 
     private int possibleMoves;
 
-    
 
     private void Awake()
     {
+
         SetDependencies();
         CreatePlayers();
+
     }
 
     private void SetDependencies()
     {
-        pieceCreator = GetComponent<PieceCreator>();
-        chessNotator = GetComponent<ChessNotationManager>();
+        pieceCreator = GetComponent<PieceCreator>();  
     }
 
     private void CreatePlayers()
@@ -49,17 +54,25 @@ public class ChessGameController : MonoBehaviour
 
     void Start()
     {
+        sceneUI = SceneManager.GetSceneByName("UI");
+        SetDependenciesInUI();
         StartNewGame();
+    }
+
+    private void SetDependenciesInUI()
+    {
+        navigatorUI = GameObject.Find("Canvas").GetComponent<UINavigator>();
+        chessNotator = GameObject.Find("Canvas").GetComponent<ChessNotationManager>();
+        board.SetUIDependencies(chessNotator);
+        navigatorUI.PauseStateChanged += OnPauseStateChanged;
     }
 
     private void StartNewGame()
     {
-        uIManager.HideUI();
         SetGameState(GameState.Init);
         board.SetDependencies(this);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
-        //chessNotator.UpdateMoveNumber();
         GenerateAllPossiblePlayerMoves(activePlayer);
         SetGameState(GameState.Play);
     }
@@ -139,9 +152,14 @@ public class ChessGameController : MonoBehaviour
                 EndGameStalemate();
 
             chessNotator.CombineNotation();
-            cameraController.MoveCamera();
+            if (PlayerPrefs.GetInt("isCameraFlipOn") == 0)
+                MoveCamera();
         }
             
+    }
+    private void MoveCamera()
+    {
+        cameraController.MoveCamera();
     }
     private bool CheckIfStalemate()
     {
@@ -209,13 +227,13 @@ public class ChessGameController : MonoBehaviour
 
     private void EndGameCheckmate()
     {
-        uIManager.OnGameFinished(activePlayer.team.ToString());
+        navigatorUI.OnGameFinished(activePlayer.team.ToString());
         SetGameState(GameState.Finished);
     }
 
     private void EndGameStalemate()
     {
-        uIManager.Stalemate();
+        navigatorUI.Stalemate();
         SetGameState(GameState.Finished);
     }
 
@@ -235,27 +253,21 @@ public class ChessGameController : MonoBehaviour
     {
         activePlayer.RemoveMovesEnablingAttackOnPiece<T>(GetOpponentToPlayer(activePlayer), piece);
     }
-
-    public void ShowPauseScreen()
+    public void SetToPromotionState()
     {
-        pauseUI.SetActive(true);
-        pauseButton.SetActive(false);
+        SetGameState(GameState.Promotion);
+    }
+    public void OnPauseStateChanged(object source, EventArgs e)
+    {
+        GameState state = (this.state ==  GameState.Pause) ? GameState.Play : GameState.Pause;
+        SetGameState(state);
     }
 
-    public void HidePauseScreen()
-    {
-        pauseUI.SetActive(false);
-        pauseButton.SetActive(true);
-    }
     public void PauseGame()
     {
         SetGameState(GameState.Pause);
     }
 
-    public void SetToPromotionState()
-    {
-        SetGameState(GameState.Promotion);
-    }
     public void ResumeGame()
     {
         SetGameState(GameState.Play);

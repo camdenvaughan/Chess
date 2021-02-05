@@ -123,3 +123,4 @@ MonoBehaviour:
   pieceName: bishop
   rotationSpeed: 0.4
   initXValue: -0.3
+  piece: {fileID: -7839903709488257215, guid: cd05c23b470229c44a8d53d6e86225f6, type: 3}

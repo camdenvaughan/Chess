@@ -6,8 +6,9 @@ using UnityEngine;
 public class PromotionPiece : MonoBehaviour
 {
     public string pieceName;
-    [SerializeField] private float rotationSpeed;
+    private float rotationSpeed = .4f;
     public float initXValue;
+    public Piece piece;
 
     private MaterialSetter materialSetter;
 

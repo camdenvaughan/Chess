@@ -123,3 +123,4 @@ MonoBehaviour:
   pieceName: rook
   rotationSpeed: 0.4
   initXValue: 0.15
+  piece: {fileID: 8903716369973824913, guid: 43ef2ba32fda59c42a1410ea490d494b, type: 3}
