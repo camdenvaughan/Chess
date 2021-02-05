@@ -2417,6 +2417,7 @@ MonoBehaviour:
   promotionManager: {fileID: 2000344897}
   cameraMovementWaitTime: 0.4
   spinSpeed: 2
+  speed: 10
 --- !u!4 &729652776
 Transform:
   m_ObjectHideFlags: 0

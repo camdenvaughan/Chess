@@ -72,12 +72,6 @@ public class Board : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    public void OnGameRestarted()
-    {
-        selectedPiece = null;
-        CreateGrid();
-    }
-
     public void OnSquareSelected(Vector3 inputPosition)
     {
         if (!chessController.IsGameInProgress())

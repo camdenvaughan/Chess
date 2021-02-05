@@ -64,11 +64,6 @@ public class ChessPlayer
         }
     }
 
-    internal void OnGameRestarted()
-    {
-        activePieces.Clear();
-    }
-
     private bool CheckIfIsAttackingPiece<T>() where T : Piece
     {
         foreach (var piece in activePieces)

@@ -111,6 +111,10 @@ public class UINavigator : MonoBehaviour
         gameOverUI.SetActive(true);
         resultText.text = string.Format("Stalemate");
     }
+    protected virtual void OnPauseStateChanged()
+    {
+        PauseStateChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     public void TogglePauseVisibility()
     {
@@ -171,9 +175,9 @@ public class UINavigator : MonoBehaviour
         OnPauseStateChanged();
     }
 
-    protected virtual void OnPauseStateChanged()
+    public void Quit()
     {
-        PauseStateChanged?.Invoke(this, EventArgs.Empty);
+        Application.Quit();
     }
 
 }

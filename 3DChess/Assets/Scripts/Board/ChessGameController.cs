@@ -74,22 +74,8 @@ public class ChessGameController : MonoBehaviour
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
         GenerateAllPossiblePlayerMoves(activePlayer);
+        cameraController.SetCameraToSpin(false);
         SetGameState(GameState.Play);
-    }
-
-    public void RestartGame()
-    {
-        DestroyPieces();
-        board.OnGameRestarted();
-        whitePlayer.OnGameRestarted();
-        blackPlayer.OnGameRestarted();
-        StartNewGame();
-    }
-
-    private void DestroyPieces()
-    {
-        whitePlayer.activePieces.ForEach(p => Destroy(p.gameObject));
-        blackPlayer.activePieces.ForEach(p => Destroy(p.gameObject));
     }
 
     private void SetGameState(GameState state)
@@ -153,14 +139,11 @@ public class ChessGameController : MonoBehaviour
 
             chessNotator.CombineNotation();
             if (PlayerPrefs.GetInt("isCameraFlipOn") == 0)
-                MoveCamera();
+                cameraController.MoveCamera();
         }
             
     }
-    private void MoveCamera()
-    {
-        cameraController.MoveCamera();
-    }
+
     private bool CheckIfStalemate()
     {
         possibleMoves = 0;
@@ -228,20 +211,20 @@ public class ChessGameController : MonoBehaviour
     private void EndGameCheckmate()
     {
         navigatorUI.OnGameFinished(activePlayer.team.ToString());
+        cameraController.SetCameraToSpin(true);
         SetGameState(GameState.Finished);
     }
 
     private void EndGameStalemate()
     {
         navigatorUI.Stalemate();
+        cameraController.SetCameraToSpin(true);
         SetGameState(GameState.Finished);
     }
 
     private void ChangeActiveTeam()
     {
         activePlayer = activePlayer == whitePlayer ? blackPlayer : whitePlayer;
-
-
     }
 
     private ChessPlayer GetOpponentToPlayer(ChessPlayer player)
@@ -262,12 +245,6 @@ public class ChessGameController : MonoBehaviour
         GameState state = (this.state ==  GameState.Pause) ? GameState.Play : GameState.Pause;
         SetGameState(state);
     }
-
-    public void PauseGame()
-    {
-        SetGameState(GameState.Pause);
-    }
-
     public void ResumeGame()
     {
         SetGameState(GameState.Play);

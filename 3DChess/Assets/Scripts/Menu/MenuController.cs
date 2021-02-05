@@ -9,9 +9,7 @@ public class MenuController : MonoBehaviour
     [Header("Board Creation")]
     [SerializeField] Board board;
     [SerializeField] private BoardLayout startingBoardLayout;
-    [Header("Menu UI")]
-    [SerializeField] GameObject menuUI;
-    [SerializeField] GameObject Canvas;
+    [SerializeField] private CameraController cameraController;
 
 
 
@@ -27,6 +25,7 @@ public class MenuController : MonoBehaviour
     private void Start()
     {
         CreatePiecesFromLayout(startingBoardLayout);
+        cameraController.SetCameraToSpin(true);
     }
     private void CreatePiecesFromLayout(BoardLayout layout)
     {
@@ -49,18 +48,5 @@ public class MenuController : MonoBehaviour
         newPiece.SetMaterial(teamMaterial);
 
         board.SetPieceOnBoard(squareCoords, newPiece);
-
     }
-
-    public void ChangeUIScreen(GameObject nextUI)
-    {
-        menuUI.SetActive(false);
-        nextUI.SetActive(true);
-    }
-    public void Back(GameObject thisUI)
-    {
-        thisUI.SetActive(false);
-        menuUI.SetActive(true);
-    }
-
 }
