@@ -35,17 +35,17 @@ public class CameraController : MonoBehaviour
 
     public void MoveCamera()
     {
-        StartCoroutine(CameraMovement());
+        StartCoroutine(LerpFromTo());
     }
 
-    private IEnumerator CameraMovement()
+   /* private IEnumerator CameraMovement()
     {
         yield return new WaitForSeconds(cameraMovementWaitTime);
 
             StartCoroutine(LerpFromTo());
 
         
-    }
+    } */
 
     IEnumerator LerpFromTo()
     {
@@ -58,7 +58,8 @@ public class CameraController : MonoBehaviour
         for (float t = 0f; t < flipSpeed; t += Time.deltaTime)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(transform.rotation.x, yValue, transform.rotation.z), t / flipSpeed);
-            yield return 0;
+            yield return null;
+
         }
 
         transform.rotation = Quaternion.Euler(transform.rotation.x, yValue, transform.rotation.z);

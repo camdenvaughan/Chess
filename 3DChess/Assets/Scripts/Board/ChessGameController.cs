@@ -13,16 +13,14 @@ public class ChessGameController : MonoBehaviour
     [SerializeField] private BoardLayout startingBoardLayout;
     [SerializeField] private Board board;
     [SerializeField] private CameraController cameraController;
+
+
+
     private ChessNotationManager chessNotator;
-
-
-
     private PieceCreator pieceCreator;
     private ChessPlayer whitePlayer;
     private ChessPlayer blackPlayer;
     private ChessPlayer activePlayer;
-
-    private Scene sceneUI;
     private UINavigator navigatorUI;
 
     
@@ -54,7 +52,6 @@ public class ChessGameController : MonoBehaviour
 
     void Start()
     {
-        sceneUI = SceneManager.GetSceneByName("UI");
         SetDependenciesInUI();
         StartNewGame();
     }
