@@ -2416,8 +2416,8 @@ MonoBehaviour:
   chessController: {fileID: 293125072}
   promotionManager: {fileID: 2000344897}
   cameraMovementWaitTime: 0.4
-  flipSpeed: 100
   rotationSpeed: 10
+  flipSpeed: 1.5
 --- !u!4 &729652776
 Transform:
   m_ObjectHideFlags: 0

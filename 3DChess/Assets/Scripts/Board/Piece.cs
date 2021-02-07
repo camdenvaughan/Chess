@@ -78,7 +78,7 @@ public abstract class Piece : MonoBehaviour
         this.board = board;
         transform.position = board.CalculatePositionFromCoords(coords);
     }
-    protected Piece GetPieceInDirection<T>(TeamColor team, Vector2Int direction) where T : Piece
+    public Piece GetPieceInDirection<T>(TeamColor team, Vector2Int direction) where T : Piece
     {
         for (int i = 1; i <= Board.BOARD_SIZE; i++)
         {

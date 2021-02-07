@@ -63,6 +63,33 @@ public class ChessPlayer
             selectedPiece.avaliableMoves.Remove(coords);
         }
     }
+    public void RemoveCastlingMoves(Piece attackedKing)
+    {
+        List<Vector2Int> coordsToRemove = new List<Vector2Int>();
+        Vector2Int leftCastlingMove = new Vector2Int(-1, -1);
+        Vector2Int rightCastlingMove = new Vector2Int(-1, -1);
+        Piece leftRook;
+        Piece rightRook;
+        foreach (var coords in attackedKing.avaliableMoves)
+        {
+            leftRook = attackedKing.GetPieceInDirection<Rook>(team, Vector2Int.left);
+            if (leftRook && !leftRook.hasMoved)
+            {
+                leftCastlingMove = attackedKing.occupiedSquare + Vector2Int.left * 2;
+                coordsToRemove.Add(leftCastlingMove);
+            }
+            rightRook = attackedKing.GetPieceInDirection<Rook>(team, Vector2Int.right);
+            if (rightRook && !rightRook.hasMoved)
+            {
+                rightCastlingMove = attackedKing.occupiedSquare + Vector2Int.right * 2;
+                coordsToRemove.Add(rightCastlingMove);
+            }
+        }
+        foreach (var coords in coordsToRemove)
+        {
+            attackedKing.avaliableMoves.Remove(coords);
+        }
+    }
 
     private bool CheckIfIsAttackingPiece<T>() where T : Piece
     {

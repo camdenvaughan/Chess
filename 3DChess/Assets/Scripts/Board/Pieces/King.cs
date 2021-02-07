@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class King : Piece
 {
+    private bool isInCheck = false;
     // 8 movement directions of a king
     Vector2Int[] directions = new Vector2Int[]
     {
@@ -36,26 +37,32 @@ public class King : Piece
 
     private void AssignCastlingMoves()
     {
-        leftCastlingMove = new Vector2Int(-1, -1);
-        rightCastlingMove = new Vector2Int(-1, -1);
-        if (!hasMoved)
+        if (!isInCheck)
         {
-            leftRook = GetPieceInDirection<Rook>(team, Vector2Int.left);
-            if (leftRook && !leftRook.hasMoved)
+            leftCastlingMove = new Vector2Int(-1, -1);
+            rightCastlingMove = new Vector2Int(-1, -1);
+            if (!hasMoved)
             {
-                leftCastlingMove = occupiedSquare + Vector2Int.left * 2;
-                avaliableMoves.Add(leftCastlingMove);
-            }
-            rightRook = GetPieceInDirection<Rook>(team, Vector2Int.right);
-            if (rightRook && !rightRook.hasMoved)
-            {
-                rightCastlingMove = occupiedSquare + Vector2Int.right * 2;
-                avaliableMoves.Add(rightCastlingMove);
+                leftRook = GetPieceInDirection<Rook>(team, Vector2Int.left);
+                if (leftRook && !leftRook.hasMoved)
+                {
+                    leftCastlingMove = occupiedSquare + Vector2Int.left * 2;
+                    avaliableMoves.Add(leftCastlingMove);
+                }
+                rightRook = GetPieceInDirection<Rook>(team, Vector2Int.right);
+                if (rightRook && !rightRook.hasMoved)
+                {
+                    rightCastlingMove = occupiedSquare + Vector2Int.right * 2;
+                    avaliableMoves.Add(rightCastlingMove);
+                }
             }
         }
     }
 
-
+    public void IsInCheck(bool state)
+    {
+        isInCheck = state;
+    }
 
     private void AssignStandardMoves()
     {
@@ -82,6 +89,7 @@ public class King : Piece
     }
     public override void MovePiece(Vector2Int coords)
     {
+        isInCheck = false;
         base.MovePiece(coords);
         if (coords == leftCastlingMove)
         {

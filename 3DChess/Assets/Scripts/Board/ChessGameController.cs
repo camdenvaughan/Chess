@@ -52,14 +52,15 @@ public class ChessGameController : MonoBehaviour
 
     void Start()
     {
-        SetDependenciesInUI();
+        SetUIDependencies();
         StartNewGame();
     }
 
-    private void SetDependenciesInUI()
+    private void SetUIDependencies()
     {
-        navigatorUI = GameObject.Find("Canvas").GetComponent<UINavigator>();
-        chessNotator = GameObject.Find("Canvas").GetComponent<ChessNotationManager>();
+        Canvas canvasUI = FindObjectOfType<Canvas>();
+        navigatorUI = canvasUI.GetComponent<UINavigator>();
+        chessNotator = canvasUI.GetComponent<ChessNotationManager>();
         board.SetUIDependencies(chessNotator);
         navigatorUI.PauseStateChanged += OnPauseStateChanged;
     }
@@ -159,10 +160,13 @@ public class ChessGameController : MonoBehaviour
     {
         
         Piece[] kingAttackingPieces = activePlayer.GetPiecesAttackingOppositePieceOfType<King>();
-        if(kingAttackingPieces.Length > 0 )
+        ChessPlayer oppositePlayer = GetOpponentToPlayer(activePlayer);
+        Piece attackedKing = oppositePlayer.GetPiecesOfType<King>().FirstOrDefault();
+        if (kingAttackingPieces.Length > 0 )
         {
-            ChessPlayer oppositePlayer = GetOpponentToPlayer(activePlayer);
-            Piece attackedKing = oppositePlayer.GetPiecesOfType<King>().FirstOrDefault();
+            //ChessPlayer oppositePlayer = GetOpponentToPlayer(activePlayer);
+            //Piece attackedKing = oppositePlayer.GetPiecesOfType<King>().FirstOrDefault();
+            attackedKing.GetComponent<King>().IsInCheck(true);
             oppositePlayer.RemoveMovesEnablingAttackOnPiece<King>(activePlayer, attackedKing);
 
             int avalaibleKingMoves = attackedKing.avaliableMoves.Count;
@@ -177,7 +181,9 @@ public class ChessGameController : MonoBehaviour
                 }
             }
             chessNotator.AddCheckOrMate("+");
+            return false;
         }
+        attackedKing.GetComponent<King>().IsInCheck(false);
         return false;
     }
 

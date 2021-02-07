@@ -7,14 +7,13 @@ public class CameraController : MonoBehaviour
     [SerializeField] private ChessGameController chessController;
     [SerializeField] private PromotionPieceManager promotionManager;
     [SerializeField] private float cameraMovementWaitTime;
+    [SerializeField] private float rotationSpeed;
     [SerializeField] private float flipSpeed;
 
-    private float yValue;
 
     private bool spinCamera;
 
 
-    [SerializeField] private float rotationSpeed;
     void Update()
     {
         if (spinCamera)
@@ -35,33 +34,21 @@ public class CameraController : MonoBehaviour
 
     public void MoveCamera()
     {
-        StartCoroutine(LerpFromTo());
+        StartCoroutine(FlipCamera(flipSpeed));
     }
 
-   /* private IEnumerator CameraMovement()
+    IEnumerator FlipCamera(float duration)
     {
+        float startRotation = transform.eulerAngles.y;
+        float endRotation = startRotation + 180.0f;
+        float t = 0.0f;
         yield return new WaitForSeconds(cameraMovementWaitTime);
-
-            StartCoroutine(LerpFromTo());
-
-        
-    } */
-
-    IEnumerator LerpFromTo()
-    {
-        yield return new WaitForSeconds(cameraMovementWaitTime);
-        if (chessController.IsTeamTurnActive(TeamColor.White))
-            yValue = 0;
-        else if (chessController.IsTeamTurnActive(TeamColor.Black))
-            yValue = 180;
-
-        for (float t = 0f; t < flipSpeed; t += Time.deltaTime)
+        while (t < duration)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(transform.rotation.x, yValue, transform.rotation.z), t / flipSpeed);
+            t += Time.deltaTime;
+            float yRotation = Mathf.Lerp(startRotation, endRotation, t / duration) % 360.0f;
+            transform.eulerAngles = new Vector3(transform.eulerAngles.x, yRotation,transform.eulerAngles.z);
             yield return null;
-
         }
-
-        transform.rotation = Quaternion.Euler(transform.rotation.x, yValue, transform.rotation.z);
     }
 }
