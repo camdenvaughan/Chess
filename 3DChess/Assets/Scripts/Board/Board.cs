@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 
 [RequireComponent(typeof(SquareSelectorCreator))]
-public class Board : MonoBehaviour
+public abstract class Board : MonoBehaviour
 {
     public const int BOARD_SIZE = 8;
 
@@ -14,20 +14,20 @@ public class Board : MonoBehaviour
     [SerializeField] private float squareSize;
     [SerializeField] private PromotionPieceManager promotionManager;
     [SerializeField] private GameObject audioManagerPrefab;
-    private ChessNotationManager chessNotator;
-
 
     private Piece[,] grid;
     private Piece selectedPiece;
     private ChessGameController chessController;
     private SquareSelectorCreator squareSelector;
     private AudioManager audioManager;
-
+    private ChessNotationManager chessNotator;
 
     [HideInInspector] public Piece lastMovedPiece;
-
     [HideInInspector] public Vector2Int possibleEnPassant;
     [HideInInspector] public Piece passantPawn;
+
+    public abstract void SelectPieceMoved(Vector2 coords);
+    public abstract void SetSelectedPiece(Vector2 coords);
 
     private void Awake()
     {
@@ -40,14 +40,12 @@ public class Board : MonoBehaviour
     {
         this.chessController = chessController;
         if (FindObjectOfType<AudioManager>() == null)
-            Instantiate(audioManagerPrefab);
-        audioManager = FindObjectOfType<AudioManager>().GetComponent<AudioManager>();
+            audioManager = Instantiate(audioManagerPrefab).GetComponent<AudioManager>();
     }
     public void SetDependencies()
     {
         if (FindObjectOfType<AudioManager>() == null)
-            Instantiate(audioManagerPrefab);
-        audioManager = FindObjectOfType<AudioManager>().GetComponent<AudioManager>();
+            audioManager = Instantiate(audioManagerPrefab).GetComponent<AudioManager>();
     }
 
     public void SetUIDependencies(ChessNotationManager chessNotationManager)
@@ -84,14 +82,14 @@ public class Board : MonoBehaviour
             if (piece != null && selectedPiece == piece)
                 DeselectPiece();
             else if (piece != null && selectedPiece != piece && chessController.IsTeamTurnActive(piece.team))
-                SelectPiece(piece);
+                SelectPiece(coords);
             else if (selectedPiece.CanMoveTo(coords))
-                OnSelectedPieceMoved(coords, selectedPiece);
+                SelectPieceMoved(coords);
         }
         else
         {
             if (piece != null && chessController.IsTeamTurnActive(piece.team))
-                SelectPiece(piece);
+                SelectPiece(coords);
         }
     }
 
@@ -110,9 +108,10 @@ public class Board : MonoBehaviour
         chessNotator.AddPromotionNotation(type);
     }
 
-    private void SelectPiece(Piece piece)
+    private void SelectPiece(Vector2Int coords)
     {
-        selectedPiece = piece;
+        Piece piece = GetPieceOnSquare(coords);
+        SetSelectedPiece(coords);
         List<Vector2Int> selection = selectedPiece.avaliableMoves;
         ShowSelectionSquares(selection);
     }
@@ -134,11 +133,11 @@ public class Board : MonoBehaviour
         squareSelector.ClearSelection();
     }
 
-    private void OnSelectedPieceMoved(Vector2Int coords, Piece piece)
+    public void OnSelectedPieceMoved(Vector2Int coords)
     {
-        chessNotator.NotateSquareCoord(coords, piece);
+        chessNotator.NotateSquareCoord(coords, selectedPiece);
         TryToTakeOppositePiece(coords);
-        UpdateBoardOnPieceMove(coords, piece.occupiedSquare, piece, null);
+        UpdateBoardOnPieceMove(coords, selectedPiece.occupiedSquare, selectedPiece, null);
         selectedPiece.MovePiece(coords);
         lastMovedPiece = selectedPiece;
         DeselectPiece();
@@ -148,6 +147,12 @@ public class Board : MonoBehaviour
             chessController.EndTurn();
         PlayPieceSound();
     }
+
+	public void OnSetSelectedPiece(Vector2Int coords)
+	{
+        Piece piece = GetPieceOnSquare(coords);
+        selectedPiece = piece;
+	}
 
     private void PlayPieceSound()
     {
@@ -237,4 +242,3 @@ public class Board : MonoBehaviour
     }
 
 }
-
