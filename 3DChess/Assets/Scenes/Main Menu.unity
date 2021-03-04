@@ -1731,7 +1731,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 519255710}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c63dfbeeff3c63b458b406ea4192522b, type: 3}
+  m_Script: {fileID: 11500000, guid: 38628cad7d097fd45a2a72688da2fb03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   bottomLeftSquareTransform: {fileID: 1335329640}
@@ -5278,8 +5278,8 @@ MonoBehaviour:
   chessController: {fileID: 0}
   promotionManager: {fileID: 0}
   cameraMovementWaitTime: 0
-  rotationSpeed: 10
   flipSpeed: 0
+  rotationSpeed: 10
 --- !u!1001 &2077782752
 PrefabInstance:
   m_ObjectHideFlags: 0

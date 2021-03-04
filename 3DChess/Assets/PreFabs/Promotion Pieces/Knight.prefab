@@ -121,5 +121,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceName: knight
+  rotationSpeed: 0.4
   initXValue: 0.3
   piece: {fileID: 1332501769761801824, guid: 7248632fb471af143947a88a47eae959, type: 3}

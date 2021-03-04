@@ -5,31 +5,31 @@ using UnityEngine.SceneManagement;
 
 
 [RequireComponent(typeof(SquareSelectorCreator))]
-public abstract class Board : MonoBehaviour
+public class Board : MonoBehaviour
 {
     public const int BOARD_SIZE = 8;
 
 
     [SerializeField] private Transform bottomLeftSquareTransform;
     [SerializeField] private float squareSize;
-    [SerializeField] protected PromotionPieceManager promotionManager;
+    [SerializeField] private PromotionPieceManager promotionManager;
     [SerializeField] private GameObject audioManagerPrefab;
+    private ChessNotationManager chessNotator;
+
 
     private Piece[,] grid;
     private Piece selectedPiece;
     private ChessGameController chessController;
     private SquareSelectorCreator squareSelector;
     private AudioManager audioManager;
-    private ChessNotationManager chessNotator;
+
 
     [HideInInspector] public Piece lastMovedPiece;
+
     [HideInInspector] public Vector2Int possibleEnPassant;
     [HideInInspector] public Piece passantPawn;
 
-    public abstract void SelectPieceMoved(Vector2 coords);
-    public abstract void SetSelectedPiece(Vector2 coords);
-
-    protected virtual void Awake()
+    private void Awake()
     {
         squareSelector = GetComponent<SquareSelectorCreator>();
         CreateGrid();
@@ -40,12 +40,14 @@ public abstract class Board : MonoBehaviour
     {
         this.chessController = chessController;
         if (FindObjectOfType<AudioManager>() == null)
-            audioManager = Instantiate(audioManagerPrefab).GetComponent<AudioManager>();
+            Instantiate(audioManagerPrefab);
+        audioManager = FindObjectOfType<AudioManager>().GetComponent<AudioManager>();
     }
     public void SetDependencies()
     {
         if (FindObjectOfType<AudioManager>() == null)
-            audioManager = Instantiate(audioManagerPrefab).GetComponent<AudioManager>();
+            Instantiate(audioManagerPrefab);
+        audioManager = FindObjectOfType<AudioManager>().GetComponent<AudioManager>();
     }
 
     public void SetUIDependencies(ChessNotationManager chessNotationManager)
@@ -72,7 +74,7 @@ public abstract class Board : MonoBehaviour
 
     public void OnSquareSelected(Vector3 inputPosition)
     {
-        if (!chessController || !chessController.CanPerformMove())
+        if (!chessController.IsGameInProgress())
             return;
         Vector2Int coords = CalculateCoordsFromPosition(inputPosition);
         Piece piece = GetPieceOnSquare(coords);
@@ -82,14 +84,14 @@ public abstract class Board : MonoBehaviour
             if (piece != null && selectedPiece == piece)
                 DeselectPiece();
             else if (piece != null && selectedPiece != piece && chessController.IsTeamTurnActive(piece.team))
-                SelectPiece(coords);
+                SelectPiece(piece);
             else if (selectedPiece.CanMoveTo(coords))
-                SelectPieceMoved(coords);
+                OnSelectedPieceMoved(coords, selectedPiece);
         }
         else
         {
             if (piece != null && chessController.IsTeamTurnActive(piece.team))
-                SelectPiece(coords);
+                SelectPiece(piece);
         }
     }
 
@@ -108,10 +110,9 @@ public abstract class Board : MonoBehaviour
         chessNotator.AddPromotionNotation(type);
     }
 
-    private void SelectPiece(Vector2Int coords)
+    private void SelectPiece(Piece piece)
     {
-        Piece piece = GetPieceOnSquare(coords);
-        SetSelectedPiece(coords);
+        selectedPiece = piece;
         List<Vector2Int> selection = selectedPiece.avaliableMoves;
         ShowSelectionSquares(selection);
     }
@@ -133,11 +134,11 @@ public abstract class Board : MonoBehaviour
         squareSelector.ClearSelection();
     }
 
-    public void OnSelectedPieceMoved(Vector2Int coords)
+    private void OnSelectedPieceMoved(Vector2Int coords, Piece piece)
     {
-        chessNotator.NotateSquareCoord(coords, selectedPiece);
+        chessNotator.NotateSquareCoord(coords, piece);
         TryToTakeOppositePiece(coords);
-        UpdateBoardOnPieceMove(coords, selectedPiece.occupiedSquare, selectedPiece, null);
+        UpdateBoardOnPieceMove(coords, piece.occupiedSquare, piece, null);
         selectedPiece.MovePiece(coords);
         lastMovedPiece = selectedPiece;
         DeselectPiece();
@@ -147,12 +148,6 @@ public abstract class Board : MonoBehaviour
             chessController.EndTurn();
         PlayPieceSound();
     }
-
-	public void OnSetSelectedPiece(Vector2Int coords)
-	{
-        Piece piece = GetPieceOnSquare(coords);
-        selectedPiece = piece;
-	}
 
     private void PlayPieceSound()
     {
@@ -242,3 +237,4 @@ public abstract class Board : MonoBehaviour
     }
 
 }
+
