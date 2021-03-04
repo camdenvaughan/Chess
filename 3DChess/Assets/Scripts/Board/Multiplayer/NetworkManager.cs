@@ -14,11 +14,23 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 	private UINavigator navigatorUI;
 
 	private ChessLevel playerLevel;
+	[SerializeField] private MultiPlayerChessController chessGameController;
+	[SerializeField] Transform boardAnchor;
+	[SerializeField] MultiPlayerBoard board;
+
+	[Header("Board Dependencies")]
+	[SerializeField] private PromotionPieceManager pieceManager;
+
 
 	public void SetUIDependencies(UINavigator navigator)
 	{
 		navigatorUI = navigator;
 		
+	}
+	
+	public MultiPlayerBoard GetBoaardDependency()
+	{
+		return board;
 	}
 
 	private void Awake()
@@ -32,7 +44,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 			navigatorUI.SetConnectionText(PhotonNetwork.NetworkClientState.ToString());
 
 	}
-public void Connect()
+	public void Connect()
 	{
 		if (PhotonNetwork.IsConnected)
 		{
@@ -44,6 +56,17 @@ public void Connect()
 			PhotonNetwork.ConnectUsingSettings();
 		}
 	}
+
+	public void CreateMultiplayerBoard()
+	{
+		if (!IsRoomFull())
+		{
+			PhotonNetwork.Instantiate(board.name, boardAnchor.position, boardAnchor.rotation);
+			board.SetBoardDependencies(pieceManager);
+		}
+	}
+
+	
 
 	#region Photon Callbacks
 	public override void OnConnectedToMaster()
@@ -67,10 +90,18 @@ public void Connect()
 	public override void OnJoinedRoom()
 	{
 		Debug.LogError($"Player {PhotonNetwork.LocalPlayer.ActorNumber} joined the room with level {(ChessLevel)PhotonNetwork.CurrentRoom.CustomProperties[LEVEL]}");
+		CreateMultiplayerBoard();
 		PrepareTeamSelectionOptions();
 		navigatorUI.SetJoinedRoomUI();
 	}
 
+
+	public override void OnPlayerEnteredRoom(Player newPlayer)
+	{
+		Debug.LogError($"Player {newPlayer.ActorNumber} joined the room");
+
+	}
+	#endregion
 	private void PrepareTeamSelectionOptions()
 	{
 		if (PhotonNetwork.CurrentRoom.PlayerCount > 1)
@@ -84,23 +115,36 @@ public void Connect()
 		}
 	}
 
-	public override void OnPlayerEnteredRoom(Player newPlayer)
+	public bool IsRoomFull()
 	{
-		Debug.LogError($"Player {newPlayer.ActorNumber} joined the room");
-
+		return PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers;
 	}
-
 	public void SetPlayerLevel(ChessLevel level)
 	{
 		playerLevel = level;
 		PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { LEVEL, level } });
 	}
 
-	internal void SelectTeam(int team)
+	public void SelectTeam(int team)
 	{
 		PhotonNetwork.LocalPlayer.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { TEAM, team } });
+		chessGameController.SetLocalPlayer((TeamColor)team);
+		navigatorUI.RestrictTeamChoice((TeamColor)team);
+
+		
+		if (PhotonNetwork.CurrentRoom.PlayerCount > 1)
+		{
+			var firstPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1);
+			var secondPlayer = PhotonNetwork.CurrentRoom.GetPlayer(2);
+			if (firstPlayer.CustomProperties.ContainsKey(TEAM) && secondPlayer.CustomProperties.ContainsKey(TEAM))
+			{
+				GameObject currentBoard = FindObjectOfType<MultiPlayerBoard>().gameObject;
+				chessGameController.SetBoardDependency(currentBoard);
+				navigatorUI.SetGameTimeUI();
+				chessGameController.StartNewGame();
+			}
+		}
 	}
 
 
-	#endregion
 }

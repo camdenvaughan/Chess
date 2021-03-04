@@ -12,7 +12,7 @@ public abstract class Board : MonoBehaviour
 
     [SerializeField] private Transform bottomLeftSquareTransform;
     [SerializeField] private float squareSize;
-    [SerializeField] private PromotionPieceManager promotionManager;
+    [SerializeField] protected PromotionPieceManager promotionManager;
     [SerializeField] private GameObject audioManagerPrefab;
 
     private Piece[,] grid;
@@ -29,7 +29,7 @@ public abstract class Board : MonoBehaviour
     public abstract void SelectPieceMoved(Vector2 coords);
     public abstract void SetSelectedPiece(Vector2 coords);
 
-    private void Awake()
+    protected virtual void Awake()
     {
         squareSelector = GetComponent<SquareSelectorCreator>();
         CreateGrid();
@@ -72,7 +72,7 @@ public abstract class Board : MonoBehaviour
 
     public void OnSquareSelected(Vector3 inputPosition)
     {
-        if (!chessController.IsGameInProgress())
+        if (!chessController || !chessController.CanPerformMove())
             return;
         Vector2Int coords = CalculateCoordsFromPosition(inputPosition);
         Piece piece = GetPieceOnSquare(coords);

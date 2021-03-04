@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private ChessGameController chessController;
-    [SerializeField] private PromotionPieceManager promotionManager;
     [SerializeField] private float cameraMovementWaitTime;
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float flipSpeed;
@@ -51,4 +49,11 @@ public class CameraController : MonoBehaviour
             yield return null;
         }
     }
+
+
+    public void SetupCamera(TeamColor team)
+	{
+        if (team == TeamColor.Black)
+            MoveCamera();
+	}
 }

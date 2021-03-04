@@ -72,12 +72,12 @@ public class UINavigator : MonoBehaviour
 		if (index == 0)
 			SetTitleUI();
 		else if (index == 1)
-			SetSinglePlayerGameTimeUI();
+			SetGameTimeUI();
 		else if (index == 2)
-			SetMultiPlayerGameTimeUI();
+			SetMultiPlayerStartUI();
 	}
 
-	private void SetSinglePlayerGameTimeUI()
+	public void SetGameTimeUI()
     {
         SetAllUIInactive();
         gameTimeUI.SetActive(true);
@@ -85,7 +85,7 @@ public class UINavigator : MonoBehaviour
     }
 
 
-	private void SetMultiPlayerGameTimeUI()
+	private void SetMultiPlayerStartUI()
     {
         SetAllUIInactive();
         connectUI.SetActive(true);
@@ -95,11 +95,13 @@ public class UINavigator : MonoBehaviour
         networkManager.SetUIDependencies(this);
         chessLevel.AddOptions(Enum.GetNames(typeof(ChessLevel)).ToList());
     }
+
     private void SetTitleUI()
     {
         SetAllUIInactive();
         titleMenuUI.SetActive(true);
     }
+
 
     private void SetAllUIInactive()
 	{

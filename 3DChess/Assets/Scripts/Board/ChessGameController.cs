@@ -6,27 +6,34 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PieceCreator))]
-public class ChessGameController : MonoBehaviour
+public abstract class ChessGameController : MonoBehaviour
 {
-    private enum GameState { Init, Play, Promotion, Pause, Finished }
+    public enum GameState { Init, Play, Promotion, Pause, Finished }
 
     [SerializeField] private BoardLayout startingBoardLayout;
-    [SerializeField] private Board board;
-    [SerializeField] private CameraController cameraController;
+    [SerializeField] protected Board board;
+    [SerializeField] protected CameraController cameraController;
 
 
 
     private ChessNotationManager chessNotator;
     private PieceCreator pieceCreator;
-    private ChessPlayer whitePlayer;
-    private ChessPlayer blackPlayer;
-    private ChessPlayer activePlayer;
+    protected ChessPlayer whitePlayer;
+    protected ChessPlayer blackPlayer;
+    protected ChessPlayer activePlayer;
     private UINavigator navigatorUI;
 
     
 
 
-    private GameState state;
+    protected GameState state;
+
+    protected abstract void SetGameState(GameState state);
+    public abstract void TryToStartCurrentGame();
+    public abstract bool CanPerformMove();
+
+    public abstract void SetUpCamera();
+    protected abstract void HandleCamera();
 
     private int possibleMoves;
 
@@ -53,7 +60,7 @@ public class ChessGameController : MonoBehaviour
     void Start()
     {
         SetUIDependencies();
-        StartNewGame();
+        //StartNewGame();
     }
 
     private void SetUIDependencies()
@@ -61,24 +68,19 @@ public class ChessGameController : MonoBehaviour
         Canvas canvasUI = FindObjectOfType<Canvas>();
         navigatorUI = canvasUI.GetComponent<UINavigator>();
         chessNotator = canvasUI.GetComponent<ChessNotationManager>();
-        board.SetUIDependencies(chessNotator);
         navigatorUI.PauseStateChanged += OnPauseStateChanged;
     }
 
-    private void StartNewGame()
+    public void StartNewGame()
     {
         SetGameState(GameState.Init);
         board.SetDependencies(this);
+        board.SetUIDependencies(chessNotator);
         CreatePiecesFromLayout(startingBoardLayout);
         activePlayer = whitePlayer;
         GenerateAllPossiblePlayerMoves(activePlayer);
-        cameraController.SetCameraToSpin(false);
-        SetGameState(GameState.Play);
-    }
-
-    private void SetGameState(GameState state)
-    {
-        this.state = state;
+        SetUpCamera();
+        TryToStartCurrentGame();
     }
 
     public bool IsGameInProgress()
@@ -136,8 +138,7 @@ public class ChessGameController : MonoBehaviour
                 EndGameStalemate();
 
             chessNotator.CombineNotation();
-            if (PlayerPrefs.GetInt("isCameraFlipOn") == 0)
-                cameraController.MoveCamera();
+            HandleCamera();
         }
             
     }
